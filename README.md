@@ -6,97 +6,103 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 0 auto;
       padding: 20px;
+      background-color: #f9f9f9;
     }
-    h1 {
-      text-align: center;
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    label, input, select {
-      display: block;
-      margin-top: 10px;
+    input, select, button {
       width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
     button {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #4CAF50;
+      background-color: #007BFF;
       color: white;
       border: none;
       cursor: pointer;
     }
-    #resultado {
+    button:hover {
+      background-color: #0056b3;
+    }
+    .resultado {
       margin-top: 20px;
+      background: #f1f1f1;
       padding: 15px;
-      background-color: #f2f2f2;
-      border-radius: 5px;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <h1>Calculadora de Conceito</h1>
-  <label for="avaliacao">Em qual avaliação você está? (1, 2 ou 3)</label>
-  <select id="avaliacao">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-  </select>  <div id="notas"></div>
-  <button onclick="calcularResultado()">Calcular Resultado</button>  <div id="resultado"></div>  <script>
-    document.getElementById("avaliacao").addEventListener("change", gerarCamposDeNota);
+  <div class="container">
+    <h2>Calculadora de Conceito</h2>
+    <label>Quantas avaliações você fez?</label>
+    <select id="avaliacao">
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+    </select><div id="notas"></div>
+<button onclick="calcular()">Calcular Conceito</button>
 
-    function gerarCamposDeNota() {
-      const container = document.getElementById("notas");
-      container.innerHTML = "";
-      const avaliacao = parseInt(document.getElementById("avaliacao").value);
+<div class="resultado" id="resultado"></div>
 
-      for (let i = 1; i <= avaliacao; i++) {
-        const label = document.createElement("label");
-        label.textContent = `Nota da Avaliação ${i}`;
-        const input = document.createElement("input");
-        input.type = "number";
-        input.id = `nota${i}`;
-        input.min = 0;
-        input.max = 10;
-        input.step = 0.1;
-        container.appendChild(label);
-        container.appendChild(input);
+  </div>  <script>
+    const select = document.getElementById("avaliacao");
+    const notasDiv = document.getElementById("notas");
+    select.addEventListener("change", atualizarCampos);
+
+    function atualizarCampos() {
+      notasDiv.innerHTML = "";
+      const num = parseInt(select.value);
+      for (let i = 1; i <= num; i++) {
+        notasDiv.innerHTML += `
+          <label>Nota da Avaliação ${i}</label>
+          <input type="number" step="0.1" id="nota${i}" />
+        `;
       }
     }
 
-    function calcularConceito(nota) {
-      if (nota < 15) return "Insuficiente";
-      if (nota < 21) return "Regular";
-      if (nota < 27) return "Bom";
-      return "Excelente";
+    function calcularConceito(notaTotal) {
+      if (notaTotal < 15) return "insuficiente";
+      else if (notaTotal < 21) return "regular";
+      else if (notaTotal < 27) return "bom";
+      else return "excelente";
     }
 
-    function calcularResultado() {
-      const avaliacao = parseInt(document.getElementById("avaliacao").value);
+    function calcular() {
+      const totalAvaliacoes = parseInt(select.value);
       let notaTotal = 0;
-
-      for (let i = 1; i <= avaliacao; i++) {
+      for (let i = 1; i <= totalAvaliacoes; i++) {
         const nota = parseFloat(document.getElementById(`nota${i}`).value) || 0;
         notaTotal += nota;
       }
 
-      const conceito = calcularConceito(notaTotal);
       const media = (notaTotal / 3).toFixed(2);
+      const conceito = calcularConceito(notaTotal);
 
-      let resultado = `<strong>Seu conceito até o momento é:</strong> ${conceito} <br> Média: ${media}<br>`;
+      let msg = `<p>Seu conceito é <strong>${conceito}</strong> com média <strong>${media}</strong>.</p>`;
 
-      if (conceito !== "Excelente") {
-        resultado += "<br>Para alcançar os próximos conceitos você precisa de:";
-        if (conceito === "Insuficiente") resultado += `<br>- Regular: ${(15 - notaTotal).toFixed(2)} pontos`;
-        if (["Insuficiente", "Regular"].includes(conceito)) resultado += `<br>- Bom: ${(21 - notaTotal).toFixed(2)} pontos`;
-        if (["Insuficiente", "Regular", "Bom"].includes(conceito)) resultado += `<br>- Excelente: ${(27 - notaTotal).toFixed(2)} pontos`;
+      if (conceito !== "excelente") {
+        msg += `<p>Para alcançar os próximos conceitos, você precisa de:</p><ul>`;
+        if (conceito === "insuficiente") msg += `<li>Regular: ${(15 - notaTotal).toFixed(2)} pontos</li>`;
+        if (["insuficiente", "regular"].includes(conceito)) msg += `<li>Bom: ${(21 - notaTotal).toFixed(2)} pontos</li>`;
+        if (["insuficiente", "regular", "bom"].includes(conceito)) msg += `<li>Excelente: ${(27 - notaTotal).toFixed(2)} pontos</li>`;
+        msg += `</ul>`;
       } else {
-        resultado += "<br>Parabéns! Você já foi aprovado com Excelente.";
+        msg += `<p>Parabéns! Você já foi aprovado com Excelente.</p>`;
       }
 
-      document.getElementById("resultado").innerHTML = resultado;
+      document.getElementById("resultado").innerHTML = msg;
     }
 
-    gerarCamposDeNota(); // inicializa com campos de nota para avaliação 1
+    atualizarCampos(); // inicializa campos
   </script></body>
 </html>
